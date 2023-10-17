@@ -54,13 +54,8 @@ namespace CurrencyExchange.Api.Controllers
 
         [HttpPost]
         [Route("currencies")]
-        public async Task<IActionResult> Create([FromBody] CurrencyDto currencyDto)
+        public async Task<IActionResult> Create([FromBody] CreateCurrencyDto currencyDto)
         {
-            if(string.IsNullOrEmpty(currencyDto.Code) 
-                || string.IsNullOrEmpty(currencyDto.FullName)
-                || string.IsNullOrEmpty(currencyDto.Sign))
-                return BadRequest();
-
             var newCurrency = new Currency
             {
                 Code = currencyDto.Code,
