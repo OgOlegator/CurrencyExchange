@@ -17,13 +17,5 @@
             CurrencyTarget = exchangeRate.CurrencyTarget;
             Rate = exchangeRate.Rate;
         }
-
-        public ExchangeRateDto(ExchangeRate exchangeRate, Currency baseCurrency, Currency targetCurrency)
-        {
-            Id = exchangeRate.Id;
-            Rate = exchangeRate.Rate;
-            CurrencyBase = baseCurrency;
-            CurrencyTarget = targetCurrency;
-        }
     }
 }

@@ -1,4 +1,6 @@
 using CurrencyExchange.Api.Data;
+using CurrencyExchange.Api.Services;
+using CurrencyExchange.Api.Services.Entity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,10 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<ICurrencyService, CurrencyService>();
+builder.Services.AddScoped<IExchangeRateService, ExchangeRateService>();
+builder.Services.AddTransient<IExchangeCurrencyService, ExchangeCurrencyService>();
 
 var app = builder.Build();
 

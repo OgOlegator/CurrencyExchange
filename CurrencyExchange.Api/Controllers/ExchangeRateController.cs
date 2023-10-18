@@ -1,6 +1,7 @@
 ﻿using CurrencyExchange.Api.Data;
 using CurrencyExchange.Api.Models;
 using CurrencyExchange.Api.Models.Dtos;
+using CurrencyExchange.Api.Services.Entity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +13,14 @@ namespace CurrencyExchange.Api.Controllers
     public class ExchangeRateController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IExchangeRateService _exchangeRateService;
+        private readonly ICurrencyService _currencyService;
 
-        public ExchangeRateController(AppDbContext context)
+        public ExchangeRateController(AppDbContext context, IExchangeRateService exchangeRateService, ICurrencyService currencyService)
         {
             _context = context;
+            _exchangeRateService = exchangeRateService;
+            _currencyService = currencyService;
         }
 
         [HttpGet]
@@ -24,28 +29,9 @@ namespace CurrencyExchange.Api.Controllers
         {
             try
             {
-                var exchangeRates = await _context.ExchangeRates
-                    .Join(_context.Currencies,
-                        exchangeRate => exchangeRate.BaseCurrencyId,
-                        currency => currency.Id,
-                        (exchangeRate, currency) => new
-                        {
-                            exchangeRate = exchangeRate,
-                            baseCurrency = currency
-                        })
-                    .Join(_context.Currencies,
-                        exchangeRate => exchangeRate.exchangeRate.TargetCurrencyId,
-                        currency => currency.Id,
-                        (exchangeRate, currency) => new
-                        {
-                            exchangeRate = exchangeRate.exchangeRate,
-                            baseCurrency = exchangeRate.baseCurrency,
-                            targetCurrency = currency
-                        })
-                    .Select(result => new ExchangeRateDto(result.exchangeRate, result.baseCurrency, result.targetCurrency))
-                    .ToListAsync();
+                var exchangeRates = await _exchangeRateService.GetAllAsync();
 
-                return Ok(exchangeRates);
+                return Ok(exchangeRates.Select(rate => new ExchangeRateDto(rate)));
             }
             catch (Exception ex)
             {
@@ -62,7 +48,7 @@ namespace CurrencyExchange.Api.Controllers
 
             try
             {
-                var exchangeRate = await GetExchangeRate(currencyPair.Substring(0, 3), currencyPair.Substring(3));
+                var exchangeRate = await _exchangeRateService.GetByCurrencyPairAsync(currencyPair.Substring(0, 3), currencyPair.Substring(3));
 
                 return Ok(new ExchangeRateDto(exchangeRate));
             }
@@ -82,22 +68,24 @@ namespace CurrencyExchange.Api.Controllers
         {
             try
             {
-                var currencyBase = GetCurrencyByCode(exchangeRateDto.BaseCurrencyCode);
-                var currencyTarget = GetCurrencyByCode(exchangeRateDto.TargetCurrencyCode);
+                var currencyBase = await _currencyService.GetByCodeAsync(exchangeRateDto.BaseCurrencyCode);
+                var currencyTarget = await _currencyService.GetByCodeAsync(exchangeRateDto.TargetCurrencyCode);
+
+                Task.WaitAll();
 
                 var newExchangeRate = new ExchangeRate
                 {
-                    BaseCurrencyId = currencyBase.Result.Id,
-                    TargetCurrencyId = currencyTarget.Result.Id,
+                    BaseCurrencyId = currencyBase.Id,
+                    TargetCurrencyId = currencyTarget.Id,
                     Rate = exchangeRateDto.Rate,
-                    CurrencyBase = currencyBase.Result,
-                    CurrencyTarget = currencyTarget.Result,
+                    CurrencyBase = currencyBase,
+                    CurrencyTarget = currencyTarget,
                 };
 
                 await _context.ExchangeRates.AddAsync(newExchangeRate);
                 await _context.SaveChangesAsync();
 
-                return Ok(newExchangeRate);
+                return Ok(new ExchangeRateDto(newExchangeRate));
             }
             catch (KeyNotFoundException)
             {
@@ -119,7 +107,7 @@ namespace CurrencyExchange.Api.Controllers
         {
             try
             {
-                var updExchangeRate = await GetExchangeRate(currencyPair.Substring(0, 3), currencyPair.Substring(3));
+                var updExchangeRate = await _exchangeRateService.GetByCurrencyPairAsync(currencyPair.Substring(0, 3), currencyPair.Substring(3));
 
                 updExchangeRate.Rate = updExchangeRateDto.Rate;
 
@@ -135,46 +123,6 @@ namespace CurrencyExchange.Api.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
-            }
-        }
-
-        async Task<Currency> GetCurrencyByCode(string code)
-        {
-            var currency = await _context.Currencies.FirstOrDefaultAsync(currency => currency.Code == code);
-
-            if (currency == null)
-                throw new KeyNotFoundException();
-
-            return currency;
-        }
-
-        async Task<ExchangeRate> GetExchangeRate(string baseCurrency, string targetCurrency)
-        {
-            try
-            {
-                var currencyBase = await GetCurrencyByCode(baseCurrency);
-                var currencyTarget = await GetCurrencyByCode(targetCurrency);
-
-                var exchangeRate = await _context.ExchangeRates
-                    .FirstOrDefaultAsync(rate
-                    => rate.BaseCurrencyId == currencyBase.Id
-                    && rate.TargetCurrencyId == currencyTarget.Id);
-
-                if (exchangeRate == null)
-                    throw new KeyNotFoundException();
-
-                exchangeRate.CurrencyBase = currencyBase;
-                exchangeRate.CurrencyTarget = currencyTarget;
-
-                return exchangeRate;
-            }
-            catch (KeyNotFoundException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw;
             }
         }
     }

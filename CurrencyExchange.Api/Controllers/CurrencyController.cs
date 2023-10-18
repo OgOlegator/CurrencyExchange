@@ -1,6 +1,7 @@
 ﻿using CurrencyExchange.Api.Data;
 using CurrencyExchange.Api.Models;
 using CurrencyExchange.Api.Models.Dtos;
+using CurrencyExchange.Api.Services.Entity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +13,12 @@ namespace CurrencyExchange.Api.Controllers
     public class CurrencyController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ICurrencyService _currencyService;
 
-        public CurrencyController(AppDbContext context)
+        public CurrencyController(AppDbContext context, ICurrencyService currencyService)
         {
             _context = context;
+            _currencyService = currencyService;
         }
 
         [HttpGet]
@@ -24,7 +27,7 @@ namespace CurrencyExchange.Api.Controllers
         {
             try
             {
-                var currencies = await _context.Currencies.ToListAsync();
+                var currencies = await _currencyService.GetAll();
                 return Ok(currencies);
             }
             catch (Exception ex)
@@ -39,12 +42,13 @@ namespace CurrencyExchange.Api.Controllers
         {
             try
             {
-                var currency = await _context.Currencies.FirstOrDefaultAsync(currency => currency.Code == code);
-
-                if (currency == null)
-                    return NotFound();
+                var currency = await _currencyService.GetByCodeAsync(code);
 
                 return Ok(currency);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
             }
             catch (Exception ex)
             {
