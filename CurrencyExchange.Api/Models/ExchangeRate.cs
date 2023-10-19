@@ -19,5 +19,15 @@ namespace CurrencyExchange.Api.Models
         public Currency CurrencyBase { get; set; }
 
         public Currency CurrencyTarget { get; set; }
+
+        public static ExchangeRate CreateByReverseExchangeRate(ExchangeRate reverseExchangeRate)
+            => new ExchangeRate
+            {
+                BaseCurrencyId = reverseExchangeRate.TargetCurrencyId,
+                TargetCurrencyId = reverseExchangeRate.BaseCurrencyId,
+                CurrencyBase = reverseExchangeRate.CurrencyTarget,
+                CurrencyTarget = reverseExchangeRate.CurrencyBase,
+                Rate = 1 / (reverseExchangeRate.Rate / 1),
+            };
     }
 }

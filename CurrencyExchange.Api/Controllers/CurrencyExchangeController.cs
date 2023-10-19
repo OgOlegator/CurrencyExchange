@@ -31,9 +31,13 @@ namespace CurrencyExchange.Api.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is FormatException || ex is OverflowException)
             {
-                return StatusCode(500, ex.Message);
+                return BadRequest("Введено некорректное колиечство");
+            }
+            catch 
+            {
+                return StatusCode(500);
             }
         }
     }
