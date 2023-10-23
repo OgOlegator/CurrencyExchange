@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CurrencyExchange.Api.Services.Entity
 {
+    /// <summary>
+    /// Сервис обертка над сущностью БД Курсы валют
+    /// </summary>
     public class ExchangeRateService : IExchangeRateService
     {
         private readonly AppDbContext _context;
@@ -16,6 +19,10 @@ namespace CurrencyExchange.Api.Services.Entity
             _currencyService = currencyService;
         }
 
+        /// <summary>
+        /// Получить все курсы
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<ExchangeRate>> GetAllAsync()
         {
             var exchangeRates = await _context.ExchangeRates
@@ -50,6 +57,12 @@ namespace CurrencyExchange.Api.Services.Entity
             return exchangeRates;
         }
 
+        /// <summary>
+        /// Получить курсы валют по валютной паре
+        /// </summary>
+        /// <param name="baseCurrency">Из какой валюты</param>
+        /// <param name="targetCurrency">В какую валюту</param>
+        /// <returns></returns>
         public async Task<ExchangeRate> GetByCurrencyPairAsync(string baseCurrency, string targetCurrency)
         {
             try

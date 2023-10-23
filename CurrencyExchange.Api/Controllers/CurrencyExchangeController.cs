@@ -17,6 +17,13 @@ namespace CurrencyExchange.Api.Controllers
             _exchangeCurrencyService = exchangeCurrencyService;
         }
 
+        /// <summary>
+        /// Обмен валюты
+        /// </summary>
+        /// <param name="from">Из какой валюты</param>
+        /// <param name="to">В какую валюту</param>
+        /// <param name="amount">Количество</param>
+        /// <returns>Обменный курс и стоимость обмена</returns>
         [HttpGet]
         [Route("exchange")]
         public async Task<IActionResult> Exchange(string from, string to, string amount)

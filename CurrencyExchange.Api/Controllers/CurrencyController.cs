@@ -21,6 +21,10 @@ namespace CurrencyExchange.Api.Controllers
             _currencyService = currencyService;
         }
 
+        /// <summary>
+        /// Получить все валюты
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("currencies")]
         public async Task<IActionResult> GetAll()
@@ -36,6 +40,11 @@ namespace CurrencyExchange.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Получить валюту по коду
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("currency/{code}")]
         public async Task<IActionResult> GetByCode(string code)
@@ -56,6 +65,11 @@ namespace CurrencyExchange.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Добавить валюту
+        /// </summary>
+        /// <param name="currencyDto"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("currencies")]
         public async Task<IActionResult> Create([FromBody] CreateCurrencyDto currencyDto)

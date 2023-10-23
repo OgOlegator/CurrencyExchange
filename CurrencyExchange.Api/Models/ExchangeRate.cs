@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CurrencyExchange.Api.Models
 {
+    /// <summary>
+    /// Курсы валют
+    /// </summary>
     [Index("BaseCurrencyId", "TargetCurrencyId", IsUnique = true, Name = "ExchangeRatePair_Index")]
     public class ExchangeRate
     {
@@ -20,17 +23,30 @@ namespace CurrencyExchange.Api.Models
 
         public Currency CurrencyTarget { get; set; }
 
-        public static ExchangeRate CreateByReverseExchangeRate(ExchangeRate reverseExchangeRate)
+        /// <summary>
+        /// Получение обратного курса
+        /// </summary>
+        /// <param name="exchangeRate"></param>
+        /// <returns></returns>
+        public static ExchangeRate CreateReverseRate(ExchangeRate exchangeRate)
             => new ExchangeRate
             {
-                BaseCurrencyId = reverseExchangeRate.TargetCurrencyId,
-                TargetCurrencyId = reverseExchangeRate.BaseCurrencyId,
-                CurrencyBase = reverseExchangeRate.CurrencyTarget,
-                CurrencyTarget = reverseExchangeRate.CurrencyBase,
-                Rate = ReverseRate(reverseExchangeRate.Rate),
+                BaseCurrencyId = exchangeRate.TargetCurrencyId,
+                TargetCurrencyId = exchangeRate.BaseCurrencyId,
+                CurrencyBase = exchangeRate.CurrencyTarget,
+                CurrencyTarget = exchangeRate.CurrencyBase,
+                Rate = ReverseRate(exchangeRate.Rate),
             };
 
-        public static ExchangeRate CreateByCorssRate(
+        /// <summary>
+        /// Получение кросс-курса (из двух курсов с общей валютой одного)
+        /// </summary>
+        /// <param name="currencyBase"></param>
+        /// <param name="currencyTarget"></param>
+        /// <param name="baseExchangeRate"></param>
+        /// <param name="targetExchangeRate"></param>
+        /// <returns></returns>
+        public static ExchangeRate CreateCorssRate(
             string currencyBase, 
             string currencyTarget, 
             ExchangeRate baseExchangeRate, 
@@ -39,11 +55,11 @@ namespace CurrencyExchange.Api.Models
             //Получаем обменные курсы в формате Base-USD и USD-Target
             var baseRate = baseExchangeRate.CurrencyBase.Code == currencyBase 
                 ? baseExchangeRate 
-                : CreateByReverseExchangeRate(baseExchangeRate);
+                : CreateReverseRate(baseExchangeRate);
 
             var targetRate = targetExchangeRate.CurrencyTarget.Code == currencyTarget 
                 ? targetExchangeRate 
-                : CreateByReverseExchangeRate(targetExchangeRate);
+                : CreateReverseRate(targetExchangeRate);
 
             return new ExchangeRate
             {
@@ -55,6 +71,11 @@ namespace CurrencyExchange.Api.Models
             };
         }
 
+        /// <summary>
+        /// Расчет обратного курса
+        /// </summary>
+        /// <param name="rate">Курс</param>
+        /// <returns></returns>
         static decimal ReverseRate(decimal rate)
                 => Math.Round(1 / (rate / 1), 3, mode: MidpointRounding.ToPositiveInfinity);
     }

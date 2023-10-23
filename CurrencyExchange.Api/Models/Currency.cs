@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CurrencyExchange.Api.Models
 {
+    /// <summary>
+    /// Валюта
+    /// </summary>
     [Index("Code", IsUnique = true, Name = "Code_Index")]
     public class Currency
     {

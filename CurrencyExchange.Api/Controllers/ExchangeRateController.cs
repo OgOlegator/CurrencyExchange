@@ -23,6 +23,10 @@ namespace CurrencyExchange.Api.Controllers
             _currencyService = currencyService;
         }
 
+        /// <summary>
+        /// Получить все обменные курсы
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("exchangeRates")]
         public async Task<IActionResult> GetAll()
@@ -39,6 +43,11 @@ namespace CurrencyExchange.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Получить курс по паре валют
+        /// </summary>
+        /// <param name="currencyPair">Из какой валюты, в какую</param>
+        /// <returns></returns>
         [HttpGet]
         [Route("exchangeRate/{currencyPair}")]
         public async Task<IActionResult> GetByCurrencyPair(string currencyPair)
@@ -62,6 +71,11 @@ namespace CurrencyExchange.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Добавить обменый курс
+        /// </summary>
+        /// <param name="exchangeRateDto">Новый курс</param>
+        /// <returns></returns>
         [HttpPost]
         [Route("exchangeRates")]
         public async Task<IActionResult> Create([FromBody] CreateExchangeRateDto exchangeRateDto)
@@ -101,6 +115,12 @@ namespace CurrencyExchange.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Обновить курс
+        /// </summary>
+        /// <param name="updExchangeRateDto">Значение курса</param>
+        /// <param name="currencyPair">Для какой пары валют?</param>
+        /// <returns></returns>
         [HttpPatch]
         [Route("exchangeRate/{currencyPair}")]
         public async Task<IActionResult> Update([FromBody] UpdateExchangeRateDto updExchangeRateDto, string currencyPair)

@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CurrencyExchange.Api.Services.Entity
 {
+    /// <summary>
+    /// Сервис обертка над сущностью БД Валюта
+    /// </summary>
     public class CurrencyService : ICurrencyService
     {
         private readonly AppDbContext _context;

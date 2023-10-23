@@ -4,6 +4,9 @@ using CurrencyExchange.Api.Services.Entity;
 
 namespace CurrencyExchange.Api.Services
 {
+    /// <summary>
+    /// Сервис расчета обмена валют
+    /// </summary>
     public class ExchangeCurrencyService : IExchangeCurrencyService
     {
         private readonly IExchangeRateService _exchangeRateService;
@@ -41,13 +44,15 @@ namespace CurrencyExchange.Api.Services
 
                 if (result == null)
                 {
+                    //Ищем обратный курс
                     var reverseExchangeRate = await Get(currencyTarget, currencyBase);
 
                     if (reverseExchangeRate != null)
-                        result = ExchangeRate.CreateByReverseExchangeRate(reverseExchangeRate);
+                        result = ExchangeRate.CreateReverseRate(reverseExchangeRate);
 
+                    //Ищем кросс-курс
                     if (result == null)
-                        result = await GetExchangeRateByCrossRate(currencyBase, currencyTarget);
+                        result = await GetCrossRate(currencyBase, currencyTarget);
                 }
 
                 return result ?? throw new KeyNotFoundException("Курс не найден");
@@ -76,7 +81,7 @@ namespace CurrencyExchange.Api.Services
         /// <param name="currencyBase"></param>
         /// <param name="currencyTarget"></param>
         /// <returns></returns>
-        private async Task<ExchangeRate> GetExchangeRateByCrossRate(string currencyBase, string currencyTarget)
+        private async Task<ExchangeRate> GetCrossRate(string currencyBase, string currencyTarget)
         {
             var exchangeRates = await _exchangeRateService.GetAllAsync();
 
@@ -102,7 +107,7 @@ namespace CurrencyExchange.Api.Services
             var firstIntersectRate = intersectExchangeRates.First();
 
             return ExchangeRate
-                .CreateByCorssRate(currencyBase, currencyTarget, firstIntersectRate.baseRate, firstIntersectRate.targetRate);
+                .CreateCorssRate(currencyBase, currencyTarget, firstIntersectRate.baseRate, firstIntersectRate.targetRate);
 
             IEnumerable<ExchangeRate> GetExchangeRatesWithCurrency(string currencyCode)
                 => exchangeRates
