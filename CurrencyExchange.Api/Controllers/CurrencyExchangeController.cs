@@ -33,7 +33,7 @@ namespace CurrencyExchange.Api.Controllers
             }
             catch (Exception ex) when (ex is FormatException || ex is OverflowException)
             {
-                return BadRequest("Введено некорректное колиечство");
+                return BadRequest("Введено некорректное количество");
             }
             catch 
             {
