@@ -8,7 +8,7 @@ namespace CurrencyExchange.Api.Models.Dtos
         public string Code { get; set; }
 
         [Required]
-        public string FullName { get; set; }
+        public string Name { get; set; }
 
         [Required]
         public string Sign { get; set; }

@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CurrencyExchange.Api.Controllers
 {
-    [Route("api")] 
     [ApiController]
     public class CurrencyController : ControllerBase
     {
@@ -77,7 +76,7 @@ namespace CurrencyExchange.Api.Controllers
             var newCurrency = new Currency
             {
                 Code = currencyDto.Code,
-                FullName = currencyDto.FullName,
+                FullName = currencyDto.Name,
                 Sign = currencyDto.Sign,
             };
 

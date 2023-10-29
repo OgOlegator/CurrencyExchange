@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CurrencyExchange.Api.Controllers
 {
-    [Route("api")]
     [ApiController]
     public class ExchangeRateController : ControllerBase
     {
