@@ -91,8 +91,6 @@ namespace CurrencyExchange.Api.Controllers
                     BaseCurrencyId = currencyBase.Id,
                     TargetCurrencyId = currencyTarget.Id,
                     Rate = exchangeRateDto.Rate,
-                    CurrencyBase = currencyBase,
-                    CurrencyTarget = currencyTarget,
                 };
 
                 await _context.ExchangeRates.AddAsync(newExchangeRate);

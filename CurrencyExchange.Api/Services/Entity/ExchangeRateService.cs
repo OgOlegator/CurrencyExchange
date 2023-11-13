@@ -26,32 +26,8 @@ namespace CurrencyExchange.Api.Services.Entity
         public async Task<List<ExchangeRate>> GetAllAsync()
         {
             var exchangeRates = await _context.ExchangeRates
-                .Join(_context.Currencies,
-                    exchangeRate => exchangeRate.BaseCurrencyId,
-                    currency => currency.Id,
-                    (exchangeRate, currency) => new
-                    {
-                        exchangeRate = exchangeRate,
-                        baseCurrency = currency
-                    })
-                .Join(_context.Currencies,
-                    exchangeRate => exchangeRate.exchangeRate.TargetCurrencyId,
-                    currency => currency.Id,
-                    (exchangeRate, currency) => new
-                    {
-                        exchangeRate = exchangeRate.exchangeRate,
-                        baseCurrency = exchangeRate.baseCurrency,
-                        targetCurrency = currency
-                    })
-                .Select(result => new ExchangeRate
-                {
-                    Id = result.exchangeRate.Id,
-                    Rate = result.exchangeRate.Rate,
-                    BaseCurrencyId = result.exchangeRate.BaseCurrencyId,
-                    TargetCurrencyId = result.exchangeRate.TargetCurrencyId,
-                    CurrencyBase = result.baseCurrency,
-                    CurrencyTarget = result.targetCurrency,
-                })
+                .Include(rate => rate.CurrencyBase)
+                .Include(rate => rate.CurrencyTarget)
                 .ToListAsync();
 
             return exchangeRates;
@@ -67,19 +43,15 @@ namespace CurrencyExchange.Api.Services.Entity
         {
             try
             {
-                var currencyBase = await _currencyService.GetByCodeAsync(baseCurrency);
-                var currencyTarget = await _currencyService.GetByCodeAsync(targetCurrency);
-
                 var exchangeRate = await _context.ExchangeRates
-                    .FirstOrDefaultAsync(rate
-                    => rate.BaseCurrencyId == currencyBase.Id
-                    && rate.TargetCurrencyId == currencyTarget.Id);
+                    .Include(rate => rate.CurrencyBase)
+                    .Include(rate => rate.CurrencyTarget)
+                    .SingleOrDefaultAsync(rate 
+                        => rate.CurrencyBase.Code == baseCurrency 
+                        && rate.CurrencyTarget.Code == targetCurrency);
 
                 if (exchangeRate == null)
                     throw new KeyNotFoundException();
-
-                exchangeRate.CurrencyBase = currencyBase;
-                exchangeRate.CurrencyTarget = currencyTarget;
 
                 return exchangeRate;
             }
